@@ -1,0 +1,43 @@
+<!-- components/navigation.html -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div href="../index.html" class="logo">ShopHub</div>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Sliding Menu -->
+<div class="slide-menu" id="slideMenu">
+  <div class="slide-menu-header">
+    <h2>My Vault</h2>
+    <button class="close-btn" id="closeBtn" aria-label="Close menu">×</button>
+  </div>
+  <div class="slide-menu-body">
+<div class="user-info">
+  <div class="user-avatar-large" id="navAvatar">?</div>
+  <div>
+    <h3 id="navUserName">Guest</h3>
+    <p id="navUserEmail">Not signed in</p>
+  </div>
+</div>
+    <ul class="menu-list">
+     <li>
+  <a href="../index.html">
+    <i class="fas fa-home"></i> Continue Shopping
+    <span class="badge"></span>
+  </a>
+</li>
+      <li><a href="userDashboard.html"><i class="fas fa-shopping-bag"></i> My Orders</a></li>
+      <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+      <li><a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist <span class="badge"></span></a></li>
+      <li>
+        <a href="#" onclick="logoutUser()">Logout</a>
+      </li>
+    </ul>
+  </div>
+</div>

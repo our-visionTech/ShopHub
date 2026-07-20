@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders • ShopHub</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --primary: #6366f1; --purple: #a78bfa; }
+    body { background:#000; color:white; font-family:'Inter',sans-serif; margin:0; overflow-x:hidden; }
+    .main-content { padding:140px 2rem 100px; max-width:1200px; margin:0 auto; }
+
+    .page-title {
+      font-size:4rem; font-weight:900; text-align:center;
+      background:linear-gradient(90deg,#fff,#a78bfa);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      margin-bottom:1rem;
+    }
+    .orders-grid { display:grid; gap:2rem; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); }
+    .order-card {
+      background:#0f0f0f; border-radius:24px; padding:2rem;
+      border:1px solid rgba(255,255,255,0.08); box-shadow:0 10px 40px rgba(0,0,0,0.6);
+      transition:transform .3s;
+    }
+    .order-card:hover { transform:translateY(-8px); }
+    .order-id { font-weight:800; font-size:1.4rem; color:var(--purple); }
+    .order-total { font-size:1.6rem; font-weight:800; color:var(--purple); text-align:right; }
+    .status-badge { padding:.4rem 1rem; border-radius:50px; font-size:.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; }
+    .status-paid { background:#166534; color:#4ade80; }
+    .status-shipped { background:#1e40af; color:#93c5fd; }
+    .status-delivered { background:#166534; color:#86efac; }
+    .status-pending { background:#7c2d12; color:#fdba74; }
+    .no-orders, .loading { text-align:center; padding:6rem; opacity:.6; font-size:1.4rem; }
+
+    /* Floating Checkout */
+    #floating-checkout {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      z-index:998; width:90%; max-width:420px; opacity:0; pointer-events:none;
+      transition:opacity .4s ease;
+    }
+    #floating-checkout.visible { opacity:1; pointer-events:all; }
+    #floating-checkout-btn {
+      width:100%; padding:1.4rem 2rem; background:linear-gradient(135deg,var(--primary),var(--purple));
+      color:white; border:none; border-radius:50px; font-size:1.3rem; font-weight:800;
+      cursor:pointer; box-shadow:0 15px 40px rgba(99,102,241,.5);
+      display:flex; align-items:center; justify-content:space-between; position:relative;
+    }
+    #floating-count-badge {
+      position:absolute; top:-8px; right:-8px; background:#4ade80; color:black;
+      width:32px; height:32px; border-radius:50%; font-weight:900; font-size:.9rem;
+      display:flex; align-items:center; justify-content:center;
+    }
+    @media (min-width:768px) {
+      #floating-checkout { bottom:30px; left:auto; right:30px; transform:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="global-navigation"></div>
+
+  <div class="main-content">
+    <h1 class="page-title">The Vault</h1>
+    <p style="text-align:center;opacity:.8;margin-bottom:3rem;">Here are all your recent purchases</p>
+
+    <div id="loading" class="loading">Loading your orders...</div>
+    <div id="orders-container" class="orders-grid" style="display:none;"></div>
+    <div id="no-orders" class="no-orders" style="display:none;">
+      <p>No orders yet. Time to treat yourself!</p>
+      <a href="../index.html" style="color:var(--primary);text-decoration:underline;">Browse Products</a>
+    </div>
+  </div>
+
+  <div id="floating-checkout">
+    <button id="floating-checkout-btn" onclick="window.location.href='../Home/checkout.html'">
+      <span>PROCEED TO CHECKOUT</span>
+      <span id="floating-total">$0.00</span>
+      <div id="floating-count-badge">0</div>
+      <i class="fas fa-shopping-bag"></i>
+    </button>
+  </div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="../Home/supabase-client.js"></script>
+  
+  <script src="script.js"></script>
+  <script>
+(async function loadPage() {
+
+  console.log("script.js loaded before nav.html ✔");
+
+  // 1. Load navigation HTML
+  const navHtml = await fetch("nav.html").then(r => r.text());
+  document.getElementById("global-navigation").innerHTML = navHtml;
+
+  // 2. Wait for nav elements, then update user
+  const observer = new MutationObserver(() => {
+    if (document.getElementById("navAvatar")) {
+      if (typeof updateNavUser === "function") updateNavUser();
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  
+ const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+  alert("Please log in to view your account");
+  window.location.href = "../Admin/adLogin.html";
+  return;
+}
+
+const userId = session.user.id;
+
+// Ensure profile exists
+let { data: profile } = await supabase
+  .from('profiles')
+  .select('id')
+  .eq('id', userId)
+  .maybeSingle();
+
+if (!profile) {
+  await supabase.from('profiles').insert({ id: userId });
+}
+
+// FETCH ORDERS + THEIR ITEMS IN ONE QUERY (Recommended)
+const { data: orders, error } = await supabase
+  .from('orders')
+  .select(`
+    id,
+    total,
+    status,
+    payment_method,
+    created_at,
+    order_items (
+      quantity,
+      price,
+      name,
+      image_url
+    )
+  `)
+  .eq('customer_id', userId)
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error("Error loading orders:", error);
+  document.getElementById('loading').textContent = "Failed to load orders";
+  return;
+}
+
+  document.getElementById('loading').style.display = 'none';
+
+  if (!orders || orders.length === 0) {
+    document.getElementById('no-orders').style.display = 'block';
+    return;
+  }
+
+  const container = document.getElementById('orders-container');
+  container.style.display = 'grid';
+
+  orders.forEach(order => {
+    const items = order.order_items || [];
+    const date = new Date(order.created_at).toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric'
+    });
+    const time = new Date(order.created_at).toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit'
+    });
+
+    const status = (order.status || 'pending').toUpperCase();
+    const statusClass = {
+      PAID: 'status-paid',
+      SHIPPED: 'status-shipped',
+      DELIVERED: 'status-delivered'
+    }[status] || 'status-pending';
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <div class="order-id">Order #${String(order.id).padStart(6, '0')}</div>
+        <div style="font-size:.95rem; opacity:.7;">${date} • ${time}</div>
+      </div>
+
+      <div style="margin:1.5rem 0;">
+        ${items.length > 0 ? items.map(item => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.7rem 0; border-bottom:1px solid #1a1a1a;">
+            <div style="display:flex; align-items:center; gap:1rem;">
+              ${item.image_url ? `<img src="${item.image_url}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">` : ''}
+              <div>
+                <div>${item.quantity} × ${item.name || 'Product'}</div>
+              </div>
+            </div>
+            <span style="font-weight:600;">$${(item.price * item.quantity).toFixed(2)}</span>
+          </div>
+        `).join('') : '<p style="opacity:.6; font-style:italic;">No items found</p>'}
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem;">
+        <div>
+          <div style="font-size:.9rem; opacity:.7;">Payment</div>
+          <div style="font-weight:600;">${order.payment_method || 'Card'}</div>
+        </div>
+        <div class="order-total">$${Number(order.total || 0).toFixed(2)}</div>
+      </div>
+
+      <div style="text-align:right; margin-top:1rem;">
+        <span class="status-badge ${statusClass}">${status}</span>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+      // ===================================================================
+      // 3. FLOATING CHECKOUT BUTTON
+      // ===================================================================
+     const updateFloating = () => {
+  const cart = JSON.parse(localStorage.getItem("shophub_cart") || "[]");
+  const el = document.getElementById("floating-checkout");
+  const badge = document.getElementById("floating-count-badge");
+  const totalEl = document.getElementById("floating-total");
+
+  const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+  const total = cart.reduce((s, i) => s + i.price * (i.quantity || 0), 0).toFixed(2);
+
+  if (count === 0) {
+    el.classList.remove("visible");
+    return;
+  }
+
+  // Only runs if there are items
+  badge.textContent = count;
+  totalEl.textContent = "$" + total;
+  el.classList.add("visible"); // Now this runs!
+};
+
+updateFloating();
+window.updateFloatingCheckout = updateFloating;
+
+    })();
+  </script>
+</body>
+</html>

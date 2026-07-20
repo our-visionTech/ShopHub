@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile • ShopHub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="protected">
+<div id="global-navigation"></div>
+
+<div class="main-content">
+  <h1 class="page-title">MY PROFILE</h1>
+  <p class="page-subtitle">Manage your account and preferences</p>
+  <div class="profile-container">
+   
+    <!-- Profile Header Card -->
+    <div class="profile-header-card">
+      <div class="avatar-section">
+        <div class="user-avatar-extra-large" id="avatar">..</div>
+        <div class="user-info-header">
+          <h2 id="fullName">Loading...</h2>
+          <p class="member-since" id="memberSince">Loading...</p>
+          <p class="user-email" id="userEmail">Loading...</p>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="totalOrders">-</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="lifetimeSpent">-</div>
+          <div class="stat-label">Lifetime Spent</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="pendingOrders">-</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <div class="settings-card">
+        <div class="card-title">Personal Information</div>
+        <div class="card-content">
+          <div class="info-row"><span>Full Name</span><strong id="infoName">Loading...</strong></div>
+          <div class="info-row"><span>Phone</span><strong id="infoPhone">-</strong></div>
+          <button class="btn-edit" id="editProfileBtn">Edit Profile</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-title">Default Shipping Address</div>
+        <div class="card-content">
+          <p><strong id="addrName">Loading...</strong></p>
+          <p id="addrLine">Loading address...</p>
+          <button class="btn-edit">Change Address</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-title">Payment Methods</div>
+        <div class="card-content" id="paymentMethodsList">
+          <div style="text-align:center;padding:2rem;color:#888;">
+            <i class="fas fa-credit-card fa-2x" style="opacity:0.3;"></i>
+            <p>No payment methods yet</p>
+          </div>
+        </div>
+        <button class="btn-add" id="addPaymentBtn">+ Add Payment Method</button>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-title">Account Settings</div>
+        <div class="card-content">
+          <div class="toggle-row"><div>Email Notifications</div><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="toggle-row"><div>SMS Updates</div><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></div>
+          <div class="toggle-row"><div>Dark Mode</div><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+        </div>
+      </div>
+
+      <div class="settings-card danger-zone">
+        <div class="card-title text-danger">Security</div>
+        <div class="card-content">
+          <button class="btn-outline">Change Password</button>
+          <button class="btn-outline">Enable Two-Factor Auth</button>
+          <hr>
+          <button class="btn-danger">Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --danger: #ef4444;
+    --radius: 18px;
+    --radius-sm: 14px;
+  }
+
+  .profile-container { max-width: 1400px; margin: 0 auto; }
+
+  .profile-header-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #111 100%);
+    border: 1px solid #1a1a1a;
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.9);
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #6366f1, #a78bfa);
+  }
+
+  .avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  .user-avatar-extra-large {
+    width: 120px; height: 120px;
+    background: white;
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 900;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+  }
+  .user-info-header h2 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+  .member-since { color: #a78bfa; font-weight: 600; }
+  .user-email { color: #aaa; font-size: 1.1rem; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+  .stat-number {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #a78bfa;
+  }
+  .stat-number sup { font-size: 1rem; }
+  .stat-label { color: #aaa; margin-top: 0.5rem; font-weight: 500; }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+  }
+
+  .settings-card {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    transition: all 0.35s ease;
+  }
+  .settings-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+  }
+
+  .card-title {
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    color: white;
+    padding: 1.4rem 2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .card-content { padding: 2rem; color: #ddd; }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.9rem 0;
+    border-bottom: 1px dashed #333;
+  }
+  .info-row:last-child { border-bottom: none; }
+
+  .payment-method {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    color: #fff;
+  }
+  .default-badge {
+    margin-left: auto;
+    background: #166534;
+    color: #bbf7d0;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+  }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+  }
+
+  /* Toggle Switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 56px;
+    height: 30px;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--primary); }
+  input:checked + .slider:before { transform: translateX(26px); }
+
+  /* Buttons */
+  .btn-edit, .btn-add {
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.8rem;
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-edit:hover, .btn-add:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99,102,241,0.4); }
+
+  .btn-outline {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    margin: 0.7rem 0;
+    background: transparent;
+    border: 1px solid #444;
+    color: #ddd;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+
+  .danger-zone .card-title { background: var(--danger); }
+  .text-danger { color: #fca5a5; }
+
+  @media (max-width: 768px) {
+    .avatar-section { flex-direction: column; text-align: center; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="../Home/supabase-client.js"></script>
+  
+<script src="script.js"></script>
+
+<script>
+(async () => {
+
+  // 1. LOAD NAV HTML
+  const navRes = await fetch("nav.html");
+  const navHtml = await navRes.text();
+  document.getElementById("global-navigation").innerHTML = navHtml;
+
+  // 2. EXECUTE ANY <script src=""> INSIDE nav.html
+  document.querySelectorAll("#global-navigation script[src]").forEach(s => {
+    const script = document.createElement("script");
+    script.src = s.src;
+    script.async = false;
+    document.body.appendChild(script);
+    s.remove();
+  });
+
+  // 3. WAIT UNTIL NAV IS READY, THEN INIT USER
+  const observer = new MutationObserver(() => {
+    if (document.getElementById("navAvatar")) {
+      if (window.updateNavUser) updateNavUser();
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.getElementById("global-navigation"), {
+    childList: true,
+    subtree: true
+  });
+
+})();
+</script>
+</body>
+</html>
