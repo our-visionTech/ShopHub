@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>uBuyIt!</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="Home/styles.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">uBuyIt!</div>
+      <i class="fas fa-bars mobile-menu-btn" id="openMobileNav"></i>
+      <div class="nav-links">
+        <a href="#">New Wears</a>
+        <a href="#" class="vault-link">
+  <span>My Vault</span>
+</a>
+        <a href="#" class="cart-icon" id="openCart">
+          Cart <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Sliding Nav from TOP -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-header">
+      <div class="logo">uBuyIt!</div>
+      <i class="fas fa-times close-cart" id="closeMobileNav" style="font-size:2rem;opacity:0.7;"></i>
+    </div>
+    <div class="mobile-nav-links">
+      <a href="#">New Wears</a>
+      <a href="#" class="vault-link">
+  <span>My Vault</span>
+</a>
+      <a href="#" id="mobileCartLink">
+        Cart
+        <div class="mobile-cart-wrapper">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="mobile-cart-count" id="mobileCartCount">0</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar - Fully Responsive -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>YOUR BAG</h2>
+      <i class="fas fa-times close-cart" id="closeCart"></i>
+    </div>
+    <div class="cart-items" id="cartItems"><p class="empty-cart">Your bag is empty</p></div>
+    <div class="cart-total">Total:<span id="cartTotal">0.00</span></div>
+    <a href="Home/checkout.html"><button class="checkout-btn">PROCEED TO CHECKOUT</button></a>
+  </div>
+
+  <!-- Hero -->
+<div class="hero">
+  <h1></h1>
+  <p></p>
+  
+  <button class="filter-toggle" onclick="toggleFilters()">
+    <i class="fas fa-sliders-h"></i> Filters & Search
+  </button>
+
+  <div id="mobileCollapse" class="search-controls">
+    <select id="filterSelect" class="filter-sort">
+      <option value="all">All Items</option>
+    </select>
+    
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search the vault..." />
+      <i class="fas fa-search search-icon"></i>
+    </div>
+    
+    <select id="sortSelect" class="filter-sort">
+      <option value="default">Featured</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+      <option value="name">Name A to Z</option>
+    </select>
+  </div>
+</div>
+
+  <!-- Products Grid -->
+  <div class="container">
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+
+  <!-- Responsive Bottom Sheet (Filters) -->
+  <div id="floatingTrigger"><i class="fas fa-sliders-h"></i></div>
+  <div id="bottomSheetOverlay"></div>
+  <div id="bottomSheet">
+    <div class="bottom-sheet-content">
+      <div class="bottom-sheet-filters">
+        <div style="position:relative;">
+          <input type="text" id="mobileSearch" class="search-box" placeholder="Search the vault..." />
+          <i class="fas fa-search" style="position:absolute; left:1.8rem; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.7); font-size:1.2rem;"></i>
+        </div>
+        <select id="mobileFilter" class="filter-sort"><option value="all">All Items</option></select>
+        <select id="mobileSort" class="filter-sort">
+          <option value="default">Featured</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="name">Name A to Z</option>
+        </select>
+      </div>
+      <h1 class="bottom-sheet-title">uBuyIt!</h1>
+    </div>
+  </div>
+
+  <div id="sizeSheetOverlay" class="sheet-overlay"></div>
+
+<div id="sizeSheet" class="size-sheet">
+  <h3>Select Size</h3>
+
+  <div id="sizeOptions"></div>
+
+  <button class="checkout-btn" id="confirmSizeBtn">Add to Cart</button>
+</div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3 class="footer-logo">u<span style="background: linear-gradient(90deg, #a78bfa, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BuyIt!</span></h3>
+        <p class="footer-desc">Premium streetwear & limited drops.<br>For those who set trends.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Shop</h4><a href="#">New Arrivals</a><a href="#">Best Sellers</a><a href="#">Sale</a><a href="#">Gift Cards</a></div>
+      <div class="footer-col"><h4>Support</h4><a href="#">Size Guide</a><a href="#">Shipping Info</a><a href="#">Returns & Exchanges</a><a href="#">Contact Us</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Collab</a></div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 ShopHub. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+</footer>
+
+ <!-- Load shared client first -->
+<script src="Home/supabase-client.js"></script>
+  
+<!-- Then main shop logic -->
+<script src="Home/main.js"></script>
+
+<!-- Finally auth & navigation -->
+<script src="Home/script.js"></script>
+
+  <script>
+
+      function toggleFilters() {
+      const controls = document.getElementById('mobileCollapse');
+      controls.classList.toggle('active');
+   }
+     
+  </script>
+  
+  <style> 
+  .hero {
+  /* Replace 'your-image.jpg' with your actual image path */
+  background-image: url('Home/Gemini_Generated_Image_4rajb54rajb54raj.png');
+  
+  /* This ensures the image covers the entire area without stretching */
+  background-size: cover;
+  
+  /* This keeps the image centered even if the screen is narrow */
+  background-position: center;
+  
+ 
+  background-repeat: no-repeat;
+  
+  /* Set the height. Use 100vh for full screen height, or 500px for a fixed banner */
+  min-height: 110vh;
+  
+  /* Optional: Ensures text stays readable on top of the image */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* Make text white to pop against the image */
+  text-align: center;
+}
+  </style>
+</body>
+</html>
