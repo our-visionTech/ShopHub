@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orders • ShopHub Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="theme-color" content="#6366f1">
+</head>
+<body>
+
+ <div id="sidebar-container"></div>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Orders</h1>
+      <div>Total: <strong id="totalOrders">0</strong></div>
+    </div>
+
+    <div class="filters">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by ID, name or email..." />
+      <div class="status-filter">
+        <select id="statusFilter">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Items</th>
+        <th>Size</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Shipping Address</th> 
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTableBody">
+      <tr>
+        <td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">
+          Loading orders...
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  </main>
+
+  <!-- Order Details Modal -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <span class="close-modal" onclick="closeModal()">x</span>
+      <h2>Order Details <small id="modalOrderId"></small></h2>
+      <p><strong>Customer:</strong> <span id="modalCustomer"></span></p>
+      <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+      <p><strong>Date:</strong> <span id="modalDate"></span></p>
+      <p><strong>Shipping Address:</strong> <span id="modalAddress"></span></p>
+
+      <div class="order-items">
+        <div class="section-title">Items</div>
+        <div id="modalItems"></div>
+      </div>
+
+      <div class="order-total">
+        Total: <span id="modalTotal"></span>
+      </div>
+
+      <label>Update Status</label>
+      <select class="status-select" id="statusSelect"></select>
+    </div>
+  </div>
+
+  <!-- ADDRESS MODAL -->
+<!-- INVOICE / ADDRESS MODAL -->
+<div class="modal-bg" id="addressModalBg" style="display:none;">
+  <div class="modal" style="max-width:650px; padding:25px;">
+
+    <span class="close-modal" onclick="closeAddressModal()">×</span>
+
+    <!-- PDF AREA -->
+    <div id="invoiceArea" style="background:white; padding:25px; border-radius:10px;">
+
+      <!-- LOGO -->
+      <div style="text-align:center; margin-bottom:20px;">
+        <img id="invoiceLogo" src="Gula!-G.jpeg" style="width:160px; height:auto;">
+      </div>
+
+      <h2 style="text-align:center; margin-bottom:15px;">Gula!- G <br> Shipping Invoice</h2>
+
+      <div id="invoiceAddressBox"></div>
+
+    </div>
+
+    <!-- FOOTER ACTIONS -->
+    <div style="text-align:right; margin-top:20px;">
+      <button class="btn" onclick="downloadInvoicePDF()">
+        <i class="fa fa-download"></i> Download PDF
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  
+ <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="script.js" defer></script>
+  
+   <script>
+ async function loadSidebar() {
+  const res = await fetch("sidebar.html");
+  const html = await res.text();
+  const container = document.getElementById("sidebar-container");
+  container.innerHTML = html;
+
+  // Highlight the active link
+  const current = location.pathname.split("/").pop();
+  container.querySelectorAll(".nav-link").forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    }
+  });
+
+  // Attach logout listener AFTER sidebar is loaded
+  const logoutBtn = container.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Optional: feedback
+      const span = logoutBtn.querySelector("span") || logoutBtn;
+      const originalText = span.textContent;
+      span.textContent = "Logging out...";
+      logoutBtn.style.pointerEvents = "none";
+
+      // Clear local/session storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed: " + error.message);
+        span.textContent = originalText;
+        logoutBtn.style.pointerEvents = "auto";
+        return;
+      }
+
+      // Redirect
+      window.location.replace("../index.html");
+    });
+  }
+}
+loadSidebar();
+
+</script>
+</body>
+</html>

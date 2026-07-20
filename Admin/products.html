@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products • ShopHub Admin</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+
+<body>
+
+<div id="sidebar-container"></div>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+  <div class="page-header">
+    <h1>Products</h1>
+    <button class="add-btn" id="addProductBtn">+ Add Product</button>
+  </div>
+
+  <div class="search-wrapper">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search by name, brand, price or ID...">
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Category</th><th>Brand</th><th>Price</th><th>Inventory</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- MODAL -->
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <span class="close-modal" id="closeModal">×</span>
+    <h2 id="modalTitle">Add Product</h2>
+
+    <!-- NEW: Image Upload -->
+    <label>Product Image</label>
+    <input type="file" id="productImage" accept="image/*">
+    <div style="margin: 10px 0;">
+      <img id="imagePreview" src="" alt="Preview" style="max-width: 100%; max-height: 200px; display: none; border-radius: 8px;">
+    </div>
+
+    <label>Category</label>
+    <select id="category"></select>
+
+    <label>Brand</label>
+    <select id="brand"></select>
+
+    <label>Name</label>
+    <input type="text" id="name">
+
+    <label>Price ($)</label>
+    <input type="number" id="price" step="0.01">
+
+    <!-- SIZE SELECTION -->
+<div id="sizeWrapper" style="display:none;">
+  <label>Available Sizes</label>
+  <div class="size-box">
+
+    <!-- Shoes -->
+    <div id="shoeSizes" style="display:none;">
+      <label class="size-row">
+        <input type="checkbox" value="38"> 38
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="38">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="39"> 39
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="39">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="40"> 40
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="40">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="41"> 41
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="41">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="42"> 42
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="42">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="43"> 43
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="43">
+      </label>
+    </div>
+
+    <!-- Clothing -->
+    <div id="clothingSizes" style="display:none;">
+      <label class="size-row">
+        <input type="checkbox" value="XS"> XS
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="XS">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="S"> S
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="S">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="M"> M
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="M">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="L"> L
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="L">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="XL"> XL
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="XL">
+      </label>
+      <label class="size-row">
+        <input type="checkbox" value="XXL"> XXL
+        <input type="number" min="0" placeholder="Qty" class="size-stock" data-size="XXL">
+      </label>
+    </div>
+
+  </div>
+</div>
+    
+<div id="generalStockWrapper" style="display:none; margin-top:10px;">
+  <label for="generalStock">Stock</label>
+  <input type="number" id="generalStock" min="0" placeholder="Enter stock">
+</div>
+
+    <button class="save-btn" id="saveProductBtn">Save Product</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>  
+<script src="script.js" defer></script>
+
+  <script>
+ async function loadSidebar() {
+  const res = await fetch("sidebar.html");
+  const html = await res.text();
+  const container = document.getElementById("sidebar-container");
+  container.innerHTML = html;
+
+  // Highlight the active link
+  const current = location.pathname.split("/").pop();
+  container.querySelectorAll(".nav-link").forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    }
+  });
+
+  // Attach logout listener AFTER sidebar is loaded
+  const logoutBtn = container.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Optional: feedback
+      const span = logoutBtn.querySelector("span") || logoutBtn;
+      const originalText = span.textContent;
+      span.textContent = "Logging out...";
+      logoutBtn.style.pointerEvents = "none";
+
+      // Clear local/session storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed: " + error.message);
+        span.textContent = originalText;
+        logoutBtn.style.pointerEvents = "auto";
+        return;
+      }
+
+      // Redirect
+      window.location.replace("../index.html");
+    });
+  }
+}
+loadSidebar();
+
+    // Image preview when selecting a file
+document.getElementById("productImage")?.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const preview = document.getElementById("imagePreview");
+  
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      preview.src = ev.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = "";
+    preview.style.display = "none";
+  }
+});
+</script>
+
+</body>
+</html>

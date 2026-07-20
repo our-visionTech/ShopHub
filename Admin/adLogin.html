@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopHub - Login & Register</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #0f0c29, #24243e);
+      background-size: 400% 400%;
+      animation: gradientBG 18s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; overflow: hidden;
+    }
+    @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    body::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3), transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(120,119,198,0.3), transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(120,119,198,0.2), transparent 50%);
+      pointer-events: none; animation: float 20s infinite linear;
+    }
+    @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-50px) rotate(10deg); } }
+    .container { perspective: 1000px; z-index: 10; }
+    .flip-card { width: 380px; height: 620px; position: relative; transform-style: preserve-3d;
+      transition: transform 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+    .flip-card.flipped { transform: rotateY(180deg); }
+    .card {
+      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+      background: rgba(255,255,255,0.12); backdrop-filter: blur(15px); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+      padding: 40px; display: flex; flex-direction: column; justify-content: center; color: white;
+    }
+    .login-card { z-index: 2; }
+    .register-card { transform: rotateY(180deg); }
+    h2 {
+      text-align: center; margin-bottom: 35px; font-size: 28px; font-weight: 700;
+      background: linear-gradient(90deg, #a29bfe, #74b9ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .input-group { position: relative; margin-bottom: 25px; }
+    .input-group input {
+      width: 100%; padding: 14px 15px 14px 50px; background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; color: white;
+      font-size: 15px; outline: none; transition: all 0.3s;
+    }
+    .input-group input:focus { border-color: #a29bfe; box-shadow: 0 0 0 4px rgba(162,155,254,0.2); background: rgba(255,255,255,0.25); }
+    .input-group input::placeholder { color: rgba(255,255,255,0.6); }
+    .input-group i { position: absolute; left: 18px; top: 16px; color: rgba(255,255,255,0.7); font-size: 18px; }
+    .main {
+      width: 100%; padding: 15px; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      background: linear-gradient(90deg, #a29bfe, #74b9ff); color: white;
+      margin-top: 10px; transition: all 0.3s;
+    }
+    .main:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(162,155,254,0.4); }
+    .social-btn {
+      background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 15px; border-radius: 12px; margin-top: 10px;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .social-btn:hover { background: rgba(255,255,255,0.25); border-color: #a29bfe; }
+    .google-btn i { color: #ea4335; }
+    .apple-btn { background: #000 !important; border: none !important; }
+    .apple-btn:hover { background: #1c1c1c !important; }
+    .switch-text { text-align: center; margin-top: 30px; font-size: 14px; color: rgba(255,255,255,0.8); }
+    .switch-text a { color: #a29bfe; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .switch-text a:hover { text-decoration: underline; }
+    .error { color: #ff6b6b; margin-top: 10px; text-align: center; font-size: 14px; }
+    .success { color: #51cf66; margin-top: 10px; text-align: center; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flip-card" id="flipCard">
+      <!-- Login Card -->
+      <div class="card login-card">
+        <h2>Welcome Back 👋</h2>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="loginEmail" placeholder="Email Address" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="loginPassword" placeholder="Password" required />
+        </div>
+        <button class="main" onclick="loginWithEmail()">Login</button>
+        <div class="switch-text">
+          New here? <a onclick="flipToRegister()">Create an account</a>
+        </div>
+        <div id="loginMessage"></div>
+      </div>
+
+      <!-- Register Card -->
+      <div class="card register-card">
+        <h2>Join Us Today</h2>
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="regName" placeholder="Full Name" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="regEmail" placeholder="Email Address" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="regPassword" placeholder="Create Password" required />
+        </div>
+        <button class="main" onclick="registerWithEmail()">Create Account</button>
+        <div class="switch-text">
+          Already have an account? <a onclick="flipToLogin()">Login here</a>
+        </div>
+        <div id="registerMessage"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const client = supabase.createClient(
+      "https://nhyucbgjocmwrkqbjjme.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oeXVjYmdqb2Ntd3JrcWJqam1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTQzNjAsImV4cCI6MjA3OTA3MDM2MH0.uu5ZzSf1CHnt_l4TKNIxWoVN_2YCCoxEZiilB1Xz0eE"
+    );
+
+    const flipCard = document.getElementById('flipCard');
+    function flipToRegister() { flipCard.classList.add('flipped'); }
+    function flipToLogin() { flipCard.classList.remove('flipped'); }
+
+    // LOGIN - NOW ACTUALLY REDIRECTS!
+    async function loginWithEmail() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const msg = document.getElementById('loginMessage');
+
+      if (!email || !password) {
+        msg.innerHTML = `<div class="error">Please fill all fields</div>`;
+        return;
+      }
+
+      const { error } = await client.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msg.innerHTML = `<div class="error">${error.message}</div>`;
+      } else {
+        msg.innerHTML = `<div class="success">Login successful! Redirecting...</div>`;
+      }
+    }
+
+    async function registerWithEmail() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const msg = document.getElementById('registerMessage');
+
+      if (!name || !email || !password) {
+        msg.innerHTML = `<div class="error">Please fill all fields</div>`;
+        return;
+      }
+
+      const { data, error } = await client.auth.signUp({
+        email, password,
+        options: { data: { full_name: name } }
+      });
+
+      if (error) {
+        msg.innerHTML = `<div class="error">${error.message}</div>`;
+      } else {
+        await client.from('profiles').upsert({
+          id: data.user.id,
+          full_name: name,
+          email: email,
+          role: 'user'
+        });
+
+        await client.auth.signInWithPassword({ email, password });
+        msg.innerHTML = `<div class="success">Welcome ${name}! Redirecting...</div>`;
+      }
+    }
+
+    function loginWithGoogle() {
+      client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+    }
+    function loginWithApple() {
+      client.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.href } });
+    }
+
+client.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
+    await redirectUserBasedOnRole(session.user);
+  }
+});
+(async () => {
+  const { data: { session } } = await client.auth.getSession();
+  if (session?.user) {
+    await redirectUserBasedOnRole(session.user);
+  }
+})();
+async function redirectUserBasedOnRole(user) {
+  // Get or create profile
+  let { data: profile } = await client
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+    await client.from('profiles').insert({
+      id: user.id,
+      full_name: name,
+      email: user.email,
+      role: 'user'
+    });
+    profile = { role: 'user' };
+  }
+  const isFreshLogin = performance.now() < 10000; 
+
+  setTimeout(() => {
+    if (profile.role === 'admin') {
+      window.location.href = 'landing.html';                   
+    } else {
+      window.location.href = '../user/userDashboard.html';     
+    }
+  }, isFreshLogin ? 1500 : 0); 
+}
+    client.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        client.auth.onAuthStateChange()('SIGNED_IN', session);
+      }
+    });
+  </script>
+</body>
+</html>
+

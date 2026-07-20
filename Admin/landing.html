@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard • ShopHub</title>
+  <!-- Icons + Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+   <div id="sidebar-container"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="header">
+      <div class="welcome">Welcome back, Admin!</div>
+      <div class="admin-avatar">A</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#10b981"><i class="fas fa-dollar-sign"></i></div>
+        <div id="sales" class="stat-value">Loading...</div>
+        <div class="stat-label">Total Sales</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#3b82f6"><i class="fas fa-shopping-bag"></i></div>
+        <div id="orders" class="stat-value">Loading...</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#8b5cf6"><i class="fas fa-cube"></i></div>
+        <div id="products" class="stat-value">Loading...</div>
+        <div class="stat-label">Products</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f59e0b"><i class="fas fa-user-friends"></i></div>
+        <div id="profiles" class="stat-value">Loading...</div>
+        <div class="stat-label">Customers</div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <h2 class="section-title">Recent Orders</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+ <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script src="script.js" defer></script>
+  
+<script>
+async function loadSidebar() {
+  const res = await fetch("sidebar.html");
+  const html = await res.text();
+  const container = document.getElementById("sidebar-container");
+  container.innerHTML = html;
+
+  // Highlight the active link
+  const current = location.pathname.split("/").pop();
+  container.querySelectorAll(".nav-link").forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    }
+  });
+
+  // Attach logout listener AFTER sidebar is loaded
+  const logoutBtn = container.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Optional: feedback
+      const span = logoutBtn.querySelector("span") || logoutBtn;
+      const originalText = span.textContent;
+      span.textContent = "Logging out...";
+      logoutBtn.style.pointerEvents = "none";
+
+      // Clear local/session storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed: " + error.message);
+        span.textContent = originalText;
+        logoutBtn.style.pointerEvents = "auto";
+        return;
+      }
+
+      // Redirect
+      window.location.replace("../index.html");
+    });
+  }
+}
+loadSidebar();
+
+</script>
+
+</body>
+</html>

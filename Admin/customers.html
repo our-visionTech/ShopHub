@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers • ShopHub Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Customers</h1>
+      <div>Total: <strong id="totalCustomers">0</strong></div>
+    </div>
+    <div class="search-wrapper">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by name, email or phone...">
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="customersTableBody">
+          <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <!-- Customer Details Modal -->
+  <div class="modal-bg" id="customerModalBg">
+    <div class="modal">
+      <span class="close-modal" id="closeCustomerModal">×</span>
+      <h2>Customer Details <small id="customerModalName"></small></h2>
+      <div id="customerDetails">
+        <p><strong>Email:</strong> <span id="customerModalEmail"></span></p>
+        <p><strong>Phone:</strong> <span id="customerModalPhone"></span></p>
+        <p><strong>Address:</strong> <span id="customerModalAddress"></span></p>
+        <p><strong>Joined:</strong> <span id="customerModalJoined"></span></p>
+        <p><strong>Total Orders:</strong> <span id="customerModalOrders"></span></p>
+        <p><strong>Total Spent:</strong> <span id="customerModalSpent"></span></p>
+        <div class="section-title">Recent Orders</div>
+        <div id="customerOrdersList"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="script.js" defer></script>
+
+  <script>
+    async function loadSidebar() {
+  const res = await fetch("sidebar.html");
+  const html = await res.text();
+  const container = document.getElementById("sidebar-container");
+  container.innerHTML = html;
+
+  // Highlight the active link
+  const current = location.pathname.split("/").pop();
+  container.querySelectorAll(".nav-link").forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    }
+  });
+
+  // Attach logout listener AFTER sidebar is loaded
+  const logoutBtn = container.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Optional: feedback
+      const span = logoutBtn.querySelector("span") || logoutBtn;
+      const originalText = span.textContent;
+      span.textContent = "Logging out...";
+      logoutBtn.style.pointerEvents = "none";
+
+      // Clear local/session storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed: " + error.message);
+        span.textContent = originalText;
+        logoutBtn.style.pointerEvents = "auto";
+        return;
+      }
+
+      // Redirect
+      window.location.replace("../index.html");
+    });
+  }
+}
+loadSidebar();
+
+  </script>
+</body>
+</html>
