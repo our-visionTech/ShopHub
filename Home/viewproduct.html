@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopHub • Product</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --primary: #6366f1; --radius: 24px; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    body { margin:0; font-family: 'Inter', sans-serif; background:#000; color:#fff; min-height:100vh; }
+    .back { 
+      position:fixed; top:2rem; left:2rem; color:white; font-size:1.5rem; z-index:1000; text-decoration:none; 
+      background:rgba(0,0,0,0.5); width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    }
+    .back:hover { background:rgba(255,255,255,0.15); }
+    .container { max-width: 1400px; margin: 0 auto; padding: 8rem 2rem 6rem; }
+    .main { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 4rem; 
+      margin-bottom: 5rem; 
+      align-items: start;
+    }
+    .product-image-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .product-image {
+      width: 100%;
+      height: 600px;
+      background: #000;
+      position: relative;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      transition: transform 0.8s ease;
+    }
+    .product-image:hover img { transform: scale(1.05); }
+    .like-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 10;
+    }
+    .like-btn.liked {
+      color: #ff4444;
+      background: rgba(255,68,68,0.2);
+    }
+    .like-btn:hover { transform: scale(1.1); }
+    .product-info h1 { 
+      font-size: 4.2rem; 
+      font-weight: 900; 
+      margin: 0 0 0.5rem; 
+      line-height: 1.1; 
+      text-transform: uppercase;
+      color: #cccccc;
+    }
+    .price { 
+      font-size: 2.8rem; 
+      font-weight: 900; 
+      color: var(--primary); 
+      margin: 1rem 0 2rem; 
+    }
+    .description { 
+      font-size: 1.2rem; 
+      line-height: 1.8; 
+      opacity: 0.9; 
+      margin-bottom: 2.5rem; 
+    }
+    .product-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      padding: 0.8rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.8px;
+      min-width: 140px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+    }
+    .view-btn {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+    .view-btn:hover { background: white; color: #000; }
+    .cart-btn {
+      background: white;
+      color: #000;
+    }
+    .cart-btn:hover { background: var(--primary); color: white; }
+    .divider { height:1px; background:linear-gradient(to right,transparent,#444,transparent); margin:5rem 0 4rem; }
+    .more h2 { 
+      font-size:2.8rem; 
+      font-weight:900; 
+      text-align:center; 
+      margin-bottom:3rem; 
+      background:linear-gradient(90deg,#fff,#a78bfa); 
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent; 
+    }
+    .more-grid { 
+      display:grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap:2.5rem; 
+    }
+    .more-card { 
+      position:relative; 
+      border-radius:var(--radius); 
+      overflow:hidden; 
+      background:#000;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6); 
+      transition:var(--transition); 
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+    }
+    .more-card:hover { transform:translateY(-12px); box-shadow:0 32px 80px rgba(99,102,241,0.45); }
+    .more-image {
+      width:100%;
+      height:420px;
+      background:#000;
+      position:relative;
+    }
+    .more-image img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#000;
+      transition:transform 0.8s ease;
+    }
+    .more-card:hover .more-image img { transform:scale(1.05); }
+    .more-like-btn {
+      position:absolute;
+      top:12px;
+      right:12px;
+      width:44px;
+      height:44px;
+      background:rgba(0,0,0,0.6);
+      backdrop-filter:blur(8px);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.3rem;
+      color:white;
+      cursor:pointer;
+      transition:var(--transition);
+      z-index:10;
+    }
+    .more-like-btn:hover { transform:scale(1.1); }
+    .more-overlay {
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,transparent 10%,rgba(0,0,0,0.96) 80%);
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      padding:2rem 1.6rem 2.2rem;
+      opacity:0;
+      transition:opacity 0.5s ease;
+    }
+    .more-card:hover .more-overlay { opacity:1; }
+    .more-info {
+      padding:0.8rem 0.6rem 1rem;
+      text-align:center;
+      background:#000;
+    }
+    .more-title {
+      font-size:0.92rem;
+      font-weight:900;
+      letter-spacing:1.2px;
+      text-transform:uppercase;
+      margin-bottom:0.4rem;
+      color:#cccccc;
+    }
+    .more-price {
+      font-size:1.25rem;
+      font-weight:900;
+      color:var(--primary);
+      margin-bottom:0.7rem;
+    }
+    .more-actions {
+      display:flex;
+      justify-content:center;
+      gap:0.7rem;
+      flex-wrap:wrap;
+    }
+    .more-action-btn {
+      padding:0.45rem 0.75rem;
+      border-radius:50px;
+      font-weight:800;
+      font-size:0.7rem;
+      letter-spacing:0.6px;
+      min-width:70px;
+      transition:var(--transition);
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+    }
+    .more-view-btn {
+      background:transparent;
+      border:1.5px solid white;
+      color:white;
+    }
+    .more-view-btn:hover { background:white; color:#000; }
+    .more-cart-btn {
+      background:white;
+      color:#000;
+    }
+    .more-cart-btn:hover { background:var(--primary); color:white; }
+    .error { text-align:center; padding:8rem 2rem; font-size:1.6rem; opacity:0.7; }
+
+    /* Responsive */
+    @media (max-width:1100px) { .more-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width:900px) { 
+      .main { grid-template-columns:1fr; gap:3rem; }
+      .product-info h1 { font-size:3.4rem; }
+      .price { font-size:2.4rem; }
+      .container { padding: 7rem 1.5rem 4rem; }
+      .back { top:1.5rem; left:1.5rem; }
+      .product-image { height: 500px; }
+    }
+    @media (max-width:700px) { 
+      .more-grid { grid-template-columns: repeat(2, 1fr); gap:1.8rem; } 
+      .more h2 { font-size:2.4rem; }
+      .product-info h1 { font-size:2.8rem; }
+      .price { font-size:2.2rem; }
+      .add-to-cart { padding:1.2rem 3rem; font-size:1.2rem; }
+      .product-image { height: 420px; }
+    }
+    @media (max-width:500px) { 
+      .more-grid { gap:1.4rem; }
+      .more-overlay { padding:1.4rem; }
+      .more-title { font-size:0.88rem; }
+      .more-price { font-size:1.2rem; }
+      .more-action-btn { padding:0.4rem 0.7rem; font-size:0.68rem; min-width:68px; }
+      .container { padding: 6rem 1rem 3rem; }
+      .back { width:44px; height:44px; font-size:1.4rem; }
+      .product-image { height: 360px; }
+    }
+    @media (max-width:868px) {
+      .more-overlay { display: none; }
+      .more-info { display: block; }
+    }
+    @media (min-width:869px) {
+      .more-info { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back"><i class="fas fa-arrow-left"></i></a>
+  <div class="container">
+    <div class="main">
+      <div class="product-image-wrapper">
+        <div class="product-image" id="productImage">
+          <img id="mainImg" src="" alt="">
+          <div class="like-btn" id="mainLikeBtn">
+            <i class="far fa-heart"></i>
+          </div>
+        </div>
+      </div>
+      <div class="product-info">
+        <h1 id="productName">Loading...</h1>
+        <div class="price" id="productPrice"></div>
+        <p class="description">Limited edition drop. Premium materials. Only available while stocks last.</p>
+        <div id="sizeSection" style="margin-bottom:1.5rem; display:none;">
+  <div style="font-weight:800; margin-bottom:0.6rem;">Select Size</div>
+  <div id="sizeOptions" style="display:flex; gap:0.6rem; flex-wrap:wrap;"></div>
+</div>
+        <div class="product-actions">
+          <button class="action-btn view-btn">QUICK VIEW</button>
+          <button class="action-btn cart-btn" id="addToCartBtn">
+            <i class="fas fa-shopping-bag"></i> ADD TO CART
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="more">
+      <h2>MORE FROM THIS DROP</h2>
+      <div class="more-grid" id="relatedProducts">
+        <p style="grid-column:1/-1;text-align:center;opacity:0.6;">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+<script src="supabase-client.js"></script>
+
+<script src="view.js"></script>
+  
+</body>
+</html>

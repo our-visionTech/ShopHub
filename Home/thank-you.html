@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thank You • ShopHub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --primary: #6366f1; --purple: #a78bfa; --radius: 24px; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: white; min-height: 100vh; }
+    .navbar {
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+      padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 80px;
+    }
+    .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 100%; }
+    .logo { font-size: 2rem; font-weight: 900; background: linear-gradient(90deg, #6366f1, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .thank-you-container {
+      max-width: 900px; margin: 0 auto; text-align: center;
+      padding: 140px 2rem 6rem; min-height: calc(100vh - 80px);
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .success-icon { font-size: 6.5rem; color: #4ade80; margin-bottom: 2rem; animation: bounce 1.8s infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+    h1 { font-size: 4.8rem; font-weight: 900; margin-bottom: 1rem;
+      background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: 1.5rem; opacity: 0.9; margin-bottom: 1rem; line-height: 1.6; }
+    
+    .order-details {
+      background: #0f0f0f; border-radius: var(--radius); padding: 3rem;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.08);
+      margin: 3rem 0; text-align: left;
+    }
+    .detail-row {
+      display: flex; justify-content: space-between; padding: 1rem 0;
+      border-bottom: 1px solid #1a1a1a; font-size: 1.2rem;
+    }
+    .detail-row:last-child { border-bottom: none; font-weight: 800; font-size: 1.6rem; color: var(--purple); }
+    .highlight { color: var(--purple); font-weight: 800; }
+    
+    .items-list {
+      margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #333;
+    }
+    .item {
+      display: flex; justify-content: space-between; padding: 0.8rem 0; opacity: 0.9;
+    }
+    .item-name { flex: 1; }
+    
+    .actions { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+    .btn { padding: 1.2rem 3rem; border-radius: 50px; font-weight: 800; font-size: 1.2rem;
+      text-decoration: none; display: inline-block; transition: var(--transition); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--purple));
+      color: white; box-shadow: 0 15px 40px rgba(99,102,241,0.5); }
+    .btn-primary:hover { transform: translateY(-5px); box-shadow: 0 25px 60px rgba(99,102,241,0.6); }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+    .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+    .loading { opacity: 0.6; font-style: italic; }
+    @media (max-width: 640px) {
+      h1 { font-size: 3.5rem; }
+      .success-icon { font-size: 5rem; }
+      .thank-you-container { padding: 120px 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="confetti" id="confetti"></div>
+  
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="logo">ShopHub</a>
+    </div>
+  </nav>
+
+  <div class="thank-you-container">
+    <i class="fas fa-check-circle success-icon"></i>
+    <h1>THANK YOU!</h1>
+    <p class="subtitle">Your order has been confirmed and is being prepared with care.</p>
+    <p class="subtitle">A confirmation email has been sent to <strong id="customer-email">loading...</strong></p>
+
+    <div class="order-details" id="orderDetails" style="display:none;">
+      <div class="detail-row">
+        <span>Order Number</span>
+        <span class="highlight" id="order-number">SH-2025-000000</span>
+      </div>
+      <div class="detail-row">
+        <span>Estimated Delivery</span>
+        <span>3–7 business days</span>
+      </div>
+      <div class="detail-row">
+        <span>Payment Method</span>
+        <span>•••• •••• •••• <span id="last4">4242</span></span>
+      </div>
+      <div class="detail-row">
+        <span>Total Paid</span>
+        <span id="total-paid">$0.00</span>
+      </div>
+
+      <div class="items-list">
+        <h3 style="margin-bottom:1rem; opacity:0.8;">Items Purchased</h3>
+        <div id="items-container"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="../index.html" class="btn btn-primary">Continue Shopping</a>
+      <a href="mailto:support@shophub.example" class="btn btn-secondary">Contact Support</a>
+    </div>
+
+    <p style="margin-top: 4rem; opacity: 0.6; font-size: 0.9rem;">
+      Questions? Reply to your confirmation email or DM us @shophub on Instagram
+    </p>
+  </div>
+
+  <!-- Confetti + Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Confetti
+    const fire = () => confetti({ particleCount: 160, spread: 80, origin: { y: 0.6 }, colors: ['#6366f1', '#a78bfa', '#c4b5fd', '#4ade80', '#ec4899'] });
+    fire(); setTimeout(fire, 300); setTimeout(fire, 600);
+
+    // Supabase
+    const supabase = supabase.createClient(
+      'https://nhyucbgjocmwrkqbjjme.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oeXVjYmdqb2Ntd3JrcWJqam1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTQzNjAsImV4cCI6MjA3OTA3MDM2MH0.uu5ZzSf1CHnt_l4TKNIxWoVN_2YCCoxEZiilB1Xz0eE'
+    );
+
+    // Get order_id from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id');
+
+    if (!orderId) {
+      document.querySelector('.thank-you-container').innerHTML = `<h1>Error</h1><p>No order ID found.</p><a href="../index.html">← Back to Shop</a>`;
+    } else {
+      // Fetch order
+      async function loadOrder() {
+        const { data: order, error } = await supabase
+          .from('orders')
+          .select('*, shipping_address')
+          .eq('id', orderId)
+          .single();
+
+        if (error || !order) {
+          console.error("Order not found:", error);
+          document.getElementById('customer-email').textContent = 'Error loading order';
+          return;
+        }
+
+        let details;
+        try {
+          details = JSON.parse(order.shipping_address);
+        } catch (e) {
+          console.error("Failed to parse shipping_address");
+          return;
+        }
+
+        const paddedId = String(order.id).padStart(6, '0');
+        document.getElementById('order-number').textContent = `SH-${new Date().getFullYear()}-${paddedId}`;
+        document.getElementById('customer-email').textContent = details.email || 'you@example.com';
+        document.getElementById('total-paid').textContent = '$' + (details.subtotal - details.discount + details.tax).toFixed(2);
+        document.getElementById('last4').textContent = details.payment_id?.slice(-4) || '4242';
+
+        // Render items
+        const itemsContainer = document.getElementById('items-container');
+        if (details.items && details.items.length > 0) {
+          itemsContainer.innerHTML = details.items.map(item => `
+            <div class="item">
+              <span class="item-name">${item.name} × ${item.quantity}</span>
+              <span>$${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+          `).join('');
+        } else {
+          itemsContainer.innerHTML = '<p>No items found</p>';
+        }
+
+        // Show the order details
+        document.getElementById('orderDetails').style.display = 'block';
+      }
+
+      loadOrder();
+    }
+  </script>
+</body>
+</html>

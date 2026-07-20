@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout • ShopHub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --purple: #a78bfa;
+      --radius: 24px;
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 2rem;
+      opacity: 0.9;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+      color: var(--primary);
+    }
+
+    .checkout-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 130px 2rem 8rem;
+      display: grid;
+      grid-template-columns: 1fr 500px;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    h1 {
+      font-size: 5rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 3rem 0 1.5rem;
+      opacity: 0.9;
+    }
+
+    .input-group {
+      margin-bottom: 1.6rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-weight: 600;
+      color: #fff;
+      opacity: 0.95;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 1.4rem 1.8rem;
+      background: rgba(20, 20, 40, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      color: #ffffff !important;
+      font-size: 1.05rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.3s ease;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.55) !important;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+      background: rgba(20, 20, 40, 0.95);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #aaa;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+      color: white;
+    }
+
+    .discount-box {
+      display: flex;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .apply-btn {
+      padding: 0 2rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 18px;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .apply-btn:hover {
+      background: #818cf8;
+    }
+
+    .order-summary {
+      background: #0f0f0f;
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 1.2rem;
+      padding: 1.4rem 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .cart-item img {
+      width: 96px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    .item-info h4 {
+      margin: 0 0 0.4rem;
+      font-size: 1.1rem;
+    }
+
+    .item-price {
+      color: var(--purple);
+      font-weight: 800;
+      margin-top: 0.5rem;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 1rem 0;
+      font-size: 1.2rem;
+    }
+
+    .grand-total {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--purple);
+      border-top: 2px solid #333;
+      padding-top: 1.4rem;
+      margin-top: 1.4rem;
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 1.6rem;
+      margin-top: 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 15px 40px rgba(99,102,241,0.5);
+      transition: var(--transition);
+    }
+
+    .pay-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .pay-btn:hover:not(:disabled) {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 60px rgba(99,102,241,0.6);
+    }
+
+    .security {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2.5rem;
+      opacity: 0.7;
+      font-size: 2rem;
+    }
+
+    .demo-banner {
+      background: #4ade80;
+      color: white;
+      text-align: center;
+      padding: 0.8rem;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .payment-info {
+      padding: 1.4rem 1.8rem;
+      background: rgba(20, 20, 40, 0.88);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .payment-info p {
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    /* ────────────────────────────────────────
+       RESPONSIVE DESIGN
+    ──────────────────────────────────────── */
+
+    @media (max-width: 1100px) {
+      .checkout-wrapper {
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+        padding: 110px 1.5rem 6rem;
+      }
+
+      .order-summary {
+        position: static !important;
+        top: auto !important;
+        order: 2;
+        margin-top: 2rem;
+      }
+
+      h1 {
+        font-size: 3.8rem;
+      }
+
+      .cart-item img {
+        width: 90px;
+        height: 130px;
+      }
+
+      .section-title {
+        margin: 2.5rem 0 1.2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .checkout-wrapper {
+        padding: 100px 1rem 5rem;
+      }
+
+      h1 {
+        font-size: 2.8rem;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 1.4rem;
+      }
+
+      .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .cart-item img {
+        width: 100%;
+        height: auto;
+        max-height: 180px;
+      }
+
+      input, select {
+        padding: 1.2rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .pay-btn {
+        padding: 1.4rem;
+        font-size: 1.3rem;
+      }
+
+      .grand-total {
+        font-size: 1.8rem;
+      }
+
+      .security {
+        font-size: 1.8rem;
+        gap: 1.5rem;
+      }
+
+      .order-summary {
+        padding: 2rem 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    ✅ Prices now in MWK • OneKhusa Payments (Redirect Flow) • Orders Save & Cart Empties
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="logo">ShopHub</a>
+      <div class="nav-links">
+        <a href="../index.html">Continue Shopping</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="checkout-wrapper">
+    <!-- Form comes first on all devices -->
+    <div>
+      <a href="../index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Vault
+      </a>
+
+      <h1>CHECKOUT</h1>
+
+      <div class="section-title">Contact Information</div>
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" required />
+      </div>
+
+      <div class="section-title">Shipping Address</div>
+      <div class="row">
+        <div class="input-group">
+          <label>First Name</label>
+          <input type="text" id="first-name" required />
+        </div>
+        <div class="input-group">
+          <label>Last Name</label>
+          <input type="text" id="last-name" required />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Street Address</label>
+        <input type="text" id="address" required />
+      </div>
+
+      <div class="input-group">
+        <label>Apt, suite, etc (optional)</label>
+        <input type="text" id="apt" />
+      </div>
+
+      <div class="row">
+        <div class="input-group">
+          <label>City</label>
+          <input type="text" id="city" required />
+        </div>
+        <div class="input-group">
+          <label>Postal Code</label>
+          <input type="text" id="postal" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-group">
+          <label for="country">Country</label>
+          <select id="country">
+            <option value="Malawi" selected>Malawi</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="+265 ..." />
+        </div>
+      </div>
+
+      <div class="section-title">Payment</div>
+
+      <div class="input-group">
+        <label for="payment-method">Select Payment Method</label>
+        <select id="payment-method" required>
+          <option value="">Choose a payment method</option>
+          <option value="airtel_money">Airtel Money</option>
+          <option value="tnm_mpamba">TNM Mpamba</option>
+          <option value="bank_card">Bank Card</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Secure Payment via OneKhusa</label>
+        <div class="payment-info">
+          <p>You will be redirected to OneKhusa's secure payment page to complete your order in MWK.</p>
+          <p>Supports: Airtel Money, Mpamba, Bank Cards, National Bank Mo626, and more.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order summary comes second on mobile -->
+    <div class="order-summary">
+      <div class="summary-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h2>ORDER SUMMARY</h2>
+        <span id="itemCount">0 items</span>
+      </div>
+
+      <div id="checkoutItems"></div>
+
+      <div class="discount-box">
+        <input type="text" id="discountCode" placeholder="Discount code" />
+        <button class="apply-btn" onclick="applyDiscount()">APPLY</button>
+      </div>
+
+      <div id="discountMessage" style="margin-top:0.5rem; min-height: 24px;"></div>
+
+      <div class="summary-totals">
+        <div class="total-row"><span>Subtotal</span><span id="subtotal">MWK 0.00</span></div>
+        <div class="total-row"><span>Discount</span><span id="discountAmount">-MWK 0.00</span></div>
+        <div class="total-row"><span>Shipping</span><span>FREE</span></div>
+        <div class="total-row"><span>Tax</span><span id="tax">MWK 0.00</span></div>
+        <div class="total-row grand-total"><span>TOTAL</span><span id="grandTotal">MWK 0.00</span></div>
+      </div>
+
+      <button class="pay-btn" id="submit">
+        <span id="button-text">PROCEED TO PAYMENT</span>
+        <span id="spinner" style="display:none;">PROCESSING...</span>
+      </button>
+
+      <div class="security">
+        <i class="fas fa-shield-alt"></i>
+        <i class="fas fa-mobile-alt"></i>
+        <i class="fas fa-credit-card"></i>
+        <i class="fas fa-university"></i>
+      </div>
+    </div>
+  </div>
+  <script src="supabase-client.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>
